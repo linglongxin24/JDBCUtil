@@ -1,4 +1,7 @@
-#玩转JDBC打造数据库操作万能工具类JDBCUtil，加入了数据库连接池提高效率，利用了参数绑定有效防止SQL注入 
+#玩转JDBC打造数据库操作万能工具类JDBCUtil，加入了高效的数据库连接池，利用了参数绑定有效防止SQL注入
+
+>在之前学习了MySQL和Oracle之后，那么，如和在Java种去连接这两种数据库。在这个轻量级的工具类当中，使用了数据库连接池
+去提高数据库连接的高效性，并且使用了PreparedStatement来执行对SQL的预编译，能够有效防止SQL注入问题。
 
 #一.准备工作:配置数据库连接属性文件：在项目新建config包下建立jdbc-mysql.properties并加入以下配置
 
@@ -1103,6 +1106,7 @@ public class DBTest {
  * 打印结果
 
 ```
+数据库的原数据
 SELECT  * FROM emp_test
 成功查询到了14行数据
 第1行：{DEPT_TEST_ID=10, EMP_ID=1001, SALARY=10000, HIRE_DATE=2010-01-12, BONUS=2000, MANAGER=1005, JOB=Manager, NAME=张无忌}
