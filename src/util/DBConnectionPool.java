@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * 数据库连接对象
+ * 数据库连接池对象，单例
  * Created by yuandl on 2016-12-16.
  */
 public class DBConnectionPool {
@@ -25,7 +25,8 @@ public class DBConnectionPool {
         try {
             /**通过属性文件获取数据库连接的参数值**/
             Properties properties = new Properties();
-            FileInputStream fileInputStream = new FileInputStream("src/config/jdbc-mysql.properties");
+//            FileInputStream fileInputStream = new FileInputStream("src/config/jdbc-mysql.properties");;
+            FileInputStream fileInputStream = new FileInputStream("src/config/jdbc-oracle.properties");;
             properties.load(fileInputStream);
             /**获取属性文件中的值**/
             String driverClassName = properties.getProperty("jdbc.driverClassName");

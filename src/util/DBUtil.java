@@ -159,13 +159,10 @@ public class DBUtil {
             preparedStatement = connection.prepareStatement(sql.toString());
             /**设置不自动提交，以便于在出现异常的时候数据库回滚**/
             connection.setAutoCommit(false);
-
-            System.out.println("-----------------------------start----------------------------------------");
-            System.out.println(sql);
+            System.out.println(getExecSQL(sql, bindArgs));
             if (bindArgs != null) {
                 /**绑定参数设置sql占位符中的值**/
                 for (int i = 0; i < bindArgs.length; i++) {
-                    System.out.println(i + 1 + "=" + bindArgs[i]);
                     preparedStatement.setObject(i + 1, bindArgs[i]);
                 }
             }
@@ -181,7 +178,7 @@ public class DBUtil {
                 operate = "修改";
             }
             System.out.println("成功" + operate + "了" + affectRowCount + "行");
-            System.out.println("-----------------------------end----------------------------------------");
+            System.out.println();
         } catch (Exception e) {
             if (connection != null) {
                 connection.rollback();
@@ -242,7 +239,7 @@ public class DBUtil {
      * 执行sql条件参数绑定形式的查询
      *
      * @param tableName   表名
-     * @param whereClause where条件
+     * @param whereClause where条件的sql
      * @param whereArgs   where条件中占位符中的值
      * @return List<Map<String, Object>>
      * @throws SQLException
@@ -297,24 +294,21 @@ public class DBUtil {
         ResultSet resultSet = null;
 
         try {
-            System.out.println("-----------------------------start----------------------------------------");
-            System.out.println(sql);
             /**获取数据库连接池中的连接**/
             connection = DBConnectionPool.getInstance().getConnection();
             preparedStatement = connection.prepareStatement(sql);
             if (bindArgs != null) {
                 /**设置sql占位符中的值**/
                 for (int i = 0; i < bindArgs.length; i++) {
-                    System.out.println(i + 1 + "=" + bindArgs[i]);
                     preparedStatement.setObject(i + 1, bindArgs[i]);
                 }
             }
-
+            System.out.println(getExecSQL(sql, bindArgs));
             /**执行sql语句，获取结果集**/
             resultSet = preparedStatement.executeQuery();
             getDatas(resultSet);
-            System.out.println("-----------------------------end----------------------------------------");
-        } catch (SQLException e) {
+            System.out.println();
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         } finally {
@@ -470,5 +464,22 @@ public class DBUtil {
     private static final Pattern sLimitPattern =
             Pattern.compile("\\s*\\d+\\s*(,\\s*\\d+\\s*)?");
 
-
+    /**
+     * After the execution of the complete SQL statement, not necessarily the actual implementation of the SQL statement
+     *
+     * @param sql      SQL statement
+     * @param bindArgs Binding parameters
+     * @return Replace? SQL statement executed after the
+     */
+    private static String getExecSQL(String sql, Object[] bindArgs) {
+        StringBuilder sb = new StringBuilder(sql);
+        if (bindArgs != null && bindArgs.length > 0) {
+            int index = 0;
+            for (int i = 0; i < bindArgs.length; i++) {
+                index = sb.indexOf("?", index);
+                sb.replace(index, index + 1, String.valueOf(bindArgs[i]));
+            }
+        }
+        return sb.toString();
+    }
 }
