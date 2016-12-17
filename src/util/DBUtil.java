@@ -153,14 +153,17 @@ public class DBUtil {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
+            /**从数据库连接池中获取数据库连接**/
             connection = DBConnectionPool.getInstance().getConnection();
+            /**执行SQL预编译**/
             preparedStatement = connection.prepareStatement(sql.toString());
             /**设置不自动提交，以便于在出现异常的时候数据库回滚**/
             connection.setAutoCommit(false);
+
             System.out.println("-----------------------------start----------------------------------------");
             System.out.println(sql);
             if (bindArgs != null) {
-                /**设置sql占位符中的值**/
+                /**绑定参数设置sql占位符中的值**/
                 for (int i = 0; i < bindArgs.length; i++) {
                     System.out.println(i + 1 + "=" + bindArgs[i]);
                     preparedStatement.setObject(i + 1, bindArgs[i]);
@@ -205,7 +208,7 @@ public class DBUtil {
      * @throws SQLException
      */
     public static List<Map<String, Object>> query(String sql) throws SQLException {
-       return executeQuery(sql,null);
+        return executeQuery(sql, null);
     }
 
     /**
