@@ -3,7 +3,7 @@
 >在之前学习了MySQL和Oracle之后，那么，如和在Java种去连接这两种数据库。在这个轻量级的工具类当中，使用了数据库连接池
 去提高数据库连接的高效性，并且使用了PreparedStatement来执行对SQL的预编译，能够有效防止SQL注入问题。
 
-#一.准备工作:配置数据库连接属性文件：在项目新建config包下建立jdbc-mysql.properties并加入以下配置
+#一.准备在配置文件配置:配置数据库连接属性文件：在项目新建config包下建立jdbc-mysql.properties并加入以下配置
 
 ```prooerties
 jdbc.driverClassName=com.mysql.jdbc.Driver
@@ -12,7 +12,7 @@ jdbc.username=root
 jdbc.password=root
 ```
 
-#二.开始工作：数据库连接池对象，单例
+#二.准备数据库连接池对象：单例
 
 ```java
 package util;
