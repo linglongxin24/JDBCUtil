@@ -1,4 +1,4 @@
-package util;
+package cn.bluemobi.dylan.util;
 
 import com.sun.istack.internal.Nullable;
 
@@ -217,10 +217,10 @@ public class DBUtil {
      * @throws SQLException
      */
     public static List<Map<String, Object>> query(String tableName,
-                                                  Map<String, Object> whereMap) throws SQLException {
+                                                  Map<String, Object> whereMap) throws Exception {
         String whereClause = "";
         Object[] whereArgs = null;
-        if (whereMap != null & whereMap.size() > 0) {
+        if (whereMap != null && whereMap.size() > 0) {
             Iterator<String> iterator = whereMap.keySet().iterator();
             whereArgs = new Object[whereMap.size()];
             int i = 0;

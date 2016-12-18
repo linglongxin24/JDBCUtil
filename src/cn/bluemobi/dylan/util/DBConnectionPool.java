@@ -1,4 +1,4 @@
-package util;
+package cn.bluemobi.dylan.util;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;

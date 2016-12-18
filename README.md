@@ -400,7 +400,7 @@ public class DBConnectionPool {
                                                    Map<String, Object> whereMap) throws SQLException {
          String whereClause = "";
          Object[] whereArgs = null;
-         if (whereMap != null & whereMap.size() > 0) {
+         if (whereMap != null && whereMap.size() > 0) {
              Iterator<String> iterator = whereMap.keySet().iterator();
              whereArgs = new Object[whereMap.size()];
              int i = 0;

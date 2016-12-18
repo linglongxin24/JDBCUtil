@@ -1,7 +1,6 @@
-import util.DBUtil;
+import cn.bluemobi.dylan.util.DBUtil;
 
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +88,7 @@ public class DBTest {
         whereMap.put("salary","10000");
         try {
             DBUtil.query("emp_test",whereMap);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
