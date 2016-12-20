@@ -1,3 +1,152 @@
+#JDBC批量插入数据优化,使用addBatch和executeBatch
+
+>在之前的[玩转JDBC打造数据库操作万能工具类JDBCUtil，加入了高效的数据库连接池，利用了参数绑定有效防止SQL注入 ](http://blog.csdn.net/linglongxin24/article/details/53750584)
+中其实忽略了一点，那就是SQL的批量插入的问题，如果来个for循环，执行上万次，肯定会很慢，那么，如何去优化呢？
+
+#一.用  preparedStatement.addBatch()配合preparedStatement.executeBatch()去批量插入
+
+```java
+ /**
+     * 执行数据库插入操作
+     *
+     * @param datas     插入数据表中key为列名和value为列对应的值的Map对象的List集合
+     * @param tableName 要插入的数据库的表名
+     * @return 影响的行数
+     * @throws SQLException SQL异常
+     */
+    public static int insertAll(String tableName, List<Map<String, Object>> datas) throws SQLException {
+        /**影响的行数**/
+        int affectRowCount = -1;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            /**从数据库连接池中获取数据库连接**/
+            connection = DBConnectionPool.getInstance().getConnection();
+
+
+            Map<String, Object> valueMap = datas.get(0);
+            /**获取数据库插入的Map的键值对的值**/
+            Set<String> keySet = valueMap.keySet();
+            Iterator<String> iterator = keySet.iterator();
+            /**要插入的字段sql，其实就是用key拼起来的**/
+            StringBuilder columnSql = new StringBuilder();
+            /**要插入的字段值，其实就是？**/
+            StringBuilder unknownMarkSql = new StringBuilder();
+            Object[] keys = new Object[valueMap.size()];
+            int i = 0;
+            while (iterator.hasNext()) {
+                String key = iterator.next();
+                keys[i] = key;
+                columnSql.append(i == 0 ? "" : ",");
+                columnSql.append(key);
+
+                unknownMarkSql.append(i == 0 ? "" : ",");
+                unknownMarkSql.append("?");
+                i++;
+            }
+            /**开始拼插入的sql语句**/
+            StringBuilder sql = new StringBuilder();
+            sql.append("INSERT INTO ");
+            sql.append(tableName);
+            sql.append(" (");
+            sql.append(columnSql);
+            sql.append(" )  VALUES (");
+            sql.append(unknownMarkSql);
+            sql.append(" )");
+
+            /**执行SQL预编译**/
+            preparedStatement = connection.prepareStatement(sql.toString());
+            /**设置不自动提交，以便于在出现异常的时候数据库回滚**/
+            connection.setAutoCommit(false);
+            System.out.println(sql.toString());
+            for (int j = 0; j < datas.size(); j++) {
+                for (int k = 0; k < keys.length; k++) {
+                    preparedStatement.setObject(k + 1, datas.get(j).get(keys[k]));
+                }
+                preparedStatement.addBatch();
+            }
+            int[] arr = preparedStatement.executeBatch();
+            connection.commit();
+            affectRowCount = arr.length;
+            System.out.println("成功了插入了" + affectRowCount + "行");
+            System.out.println();
+        } catch (Exception e) {
+            if (connection != null) {
+                connection.rollback();
+            }
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return affectRowCount;
+    }
+```
+
+#二.实验论证
+
+###### 1.普通的插入方法一次性插入10000条数据所消耗的时间
+
+```java
+ private static void testAll1() {
+
+        long start = System.currentTimeMillis();
+        try {
+            for (int i = 0; i < 10000; i++) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("emp_id", 1013);
+                map.put("name", "JDBCUtil测试");
+                map.put("job", "developer");
+                map.put("salary", 10000);
+                map.put("hire_date", new java.sql.Date(System.currentTimeMillis()));
+                DBUtil.insert("emp_test3", map);
+            }
+            System.out.println("共耗时" + (System.currentTimeMillis() - start));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+```
+ * 打印结果
+ 
+>共耗时44110
+
+
+###### 2.优化后的方法一次性插入10000条数据所消耗的时间
+
+```java
+  private static void testAll2() {
+        List<Map<String, Object>> datas = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("emp_id", 1013);
+            map.put("name", "JDBCUtil测试");
+            map.put("job", "developer");
+            map.put("salary", 10000);
+            map.put("hire_date", new java.sql.Date(System.currentTimeMillis()));
+            datas.add(map);
+        }
+        try {
+            long start = System.currentTimeMillis();
+            DBUtil.insertAll("emp_test3", datas);
+            System.out.println("共耗时" + (System.currentTimeMillis() - start));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+```
+ * 打印结果
+ 
+>共耗时649
+
+#3.DBUtil的完整代码
+
+```java
 package cn.bluemobi.dylan.util;
 
 import com.sun.istack.internal.Nullable;
@@ -564,3 +713,9 @@ public class DBUtil {
         return sb.toString();
     }
 }
+
+```
+
+#四.[GitHub](https://github.com/linglongxin24/JDBCUtil)
+ 
+   
