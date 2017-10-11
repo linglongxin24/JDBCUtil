@@ -387,7 +387,7 @@ public class DBUtil {
             System.out.println(getExecSQL(sql, bindArgs));
             /**执行sql语句，获取结果集**/
             resultSet = preparedStatement.executeQuery();
-            getDatas(resultSet);
+            datas = getDatas(resultSet);
             System.out.println();
         } catch (Exception e) {
             e.printStackTrace();
